@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Islamiat Pro Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #00695c; /* Islamic Green */
+            --accent: #4db6ac;
+            --bg: #e0f2f1;
+            --white: #ffffff;
+            --text: #263238;
+            --correct: #2e7d32;
+            --wrong: #c62828;
+            --shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Noto Naskh Arabic', sans-serif;
+            background: var(--bg);
+            margin: 0;
+            padding: 0;
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent body scroll, handle inside container */
+        }
+
+        /* --- Header --- */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 30px 30px;
+            box-shadow: var(--shadow);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        h1 { margin: 0; font-size: 1.8rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+        .subtitle { font-size: 0.9rem; opacity: 0.9; margin-top: 5px; }
+
+        /* --- Main Content --- */
+        .app-container {
+            flex: 1;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-y: auto; /* Scroll inside here */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        /* --- Question Card --- */
+        .question-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border-top: 5px solid var(--primary);
+            animation: slideIn 0.4s ease;
+        }
+
+        .question-number {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        /* --- Options --- */
+        .options-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .option-btn {
+            background: #f5f5f5;
+            border: 2px solid transparent;
+            padding: 15px 20px;
+            border-radius: 12px;
+            text-align: right;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-family: 'Noto Naskh Arabic', serif;
+            transition: all 0.2s;
+            position: relative;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .option-btn:active { transform: scale(0.98); }
+
+        /* Status Colors */
+        .option-btn.correct { background: var(--correct); color: white; border-color: var(--correct); }
+        .option-btn.wrong { background: var(--wrong); color: white; border-color: var(--wrong); }
+        
+        /* --- Explanation Box --- */
+        .explanation-box {
+            margin-top: 20px;
+            background: #e8f5e9;
+            border-right: 4px solid var(--correct);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            line-height: 1.7;
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s;
+        }
+
+        .exp-title {
+            font-weight: bold;
+            color: var(--correct);
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .exp-detail { color: #555; font-size: 0.95rem; }
+
+        /* --- Navigation --- */
+        .nav-area {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+            padding-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Noto Naskh Arabic', sans-serif;
+            font-size: 1rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-next { background: var(--primary); color: white; margin-right: auto; }
+        .btn-prev { background: #b0bec5; color: white; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>اسلامیات کوئز</h1>
+        <div class="subtitle">امتحانی تیاری (ایف پی ایس سی / این ٹی ایس)</div>
+    </header>
+
+    <div class="app-container">
+        <div class="question-card" id="card">
+            <span class="question-number" id="q-num">سوال 1 / 10</span>
+            <div class="question-text" id="q-text">لوڈنگ...</div>
+            
+            <div class="options-list" id="opt-list">
+                </div>
+
+            <div class="explanation-box" id="exp-box">
+                <span class="exp-title">💡 اہم معلومات:</span>
+                <span id="exp-text"></span>
+            </div>
+        </div>
+
+        <div class="nav-area">
+            <button class="btn btn-prev" onclick="prevQuestion()">واپس</button>
+            <button class="btn btn-next" onclick="nextQuestion()">اگلا سوال</button>
+        </div>
+    </div>
+
+    
+
+<script>
+    // --- 1. OFFLINE SOUND SYSTEM (No Internet Needed) ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+            // Short "Pop" sound
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, now);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        } 
+        else if (type === 'correct') {
+            // "Ding!" (High Pitch Slide Up)
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        } 
+        else if (type === 'wrong') {
+            // "Buzz" (Low Pitch Sawtooth)
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+            gainNode.gain.setValueAtTime(0.1, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        }
+    }
+
+    // --- 2. FULL 30 QUESTION DATABASE ---
+    const quizData = [
+        {
+            q: "حدیث کی کتنی اقسام ہیں؟",
+            options: ["دو (قولی، فعلی)", "تین (قولی، فعلی، تقریری)", "چار", "چھ"],
+            answer: 1,
+            explanation: "درست جواب: تین۔<br>1. قولی (فرمان)، 2. فعلی (عمل)، 3. تقریری (خاموشی)۔"
+        },
+        {
+            q: "قرآن مجید کی کن سورتوں کے نام انبیاء کرام کے ناموں پر رکھے گئے ہیں؟",
+            options: ["پانچ", "سات", "چھ", "چار"],
+            answer: 2,
+            explanation: "درست جواب: چھ۔<br>سورتیں: یونس، ہود، یوسف، ابراہیم، محمدﷺ، نوح۔"
+        },
+        {
+            q: "قرآن مجید کی موجودہ ترتیب کونسی ہے؟",
+            options: ["ترتیبِ نزولی (وحی)", "ترتیبِ توقیفی (اللہ کے حکم سے)", "ترتیبِ ہجری", "ترتیبِ ابجدی"],
+            answer: 1,
+            explanation: "درست جواب: ترتیب توقیفی۔<br>یہ ترتیب نبی کریمﷺ نے جبرائیلؑ کے ذریعے اللہ کے حکم پر لگوائی۔"
+        },
+        {
+            q: "اسلام کی پہلی شہید خاتون کا نام بتائیں؟",
+            options: ["حضرت خدیجہؓ", "حضرت عائشہؓ", "حضرت سمیہؓ", "حضرت فاطمہؓ"],
+            answer: 2,
+            explanation: "درست جواب: حضرت سمیہؓ۔<br>انہیں ابو جہل نے شہید کیا تھا۔ حضرت خدیجہؓ پہلی مسلمان خاتون تھیں۔"
+        },
+        {
+            q: "چاند گرہن کے وقت کونسی نماز پڑھی جاتی ہے؟",
+            options: ["نمازِ کسوف", "نمازِ خسوف", "نمازِ استسقاء", "نمازِ وتر"],
+            answer: 1,
+            explanation: "درست جواب: نمازِ خسوف (خ سے چاند)۔<br>نمازِ کسوف سورج گرہن کے وقت پڑھی جاتی ہے۔"
+        },
+        {
+            q: "سورج گرہن کے وقت کونسی نماز پڑھی جاتی ہے؟",
+            options: ["نمازِ کسوف", "نمازِ خسوف", "نمازِ اشراق", "نمازِ چاشت"],
+            answer: 0,
+            explanation: "درست جواب: نمازِ کسوف۔<br>سورج گرہن کے وقت لمبی رکعتوں والی نماز پڑھی جاتی ہے۔"
+        },
+        {
+            q: "نجاشی کے دربار میں حضرت جعفرؓ نے کونسی سورہ کی تلاوت کی؟",
+            options: ["سورہ مریم", "سورہ یاسین", "سورہ رحمٰن", "سورہ کوثر"],
+            answer: 0,
+            explanation: "درست جواب: سورہ مریم۔<br>اس میں حضرت عیسیٰؑ کا ذکر سن کر نجاشی بادشاہ رو پڑا تھا۔"
+        },
+        {
+            q: "وحدت الشہود کے علمبردار کون تھے؟",
+            options: ["ابنِ عربی", "شاہ ولی اللہ", "شیخ سرہندی (مجدد الف ثانی)", "داتا گنج بخش"],
+            answer: 2,
+            explanation: "درست جواب: شیخ احمد سرہندی۔<br>انہوں نے دینِ الہٰی کا مقابلہ کیا۔ ابن عربی کا نظریہ 'وحدت الوجود' تھا۔"
+        },
+        {
+            q: "قرآن مجید میں کتنی مساجد کا ذکر آیا ہے؟",
+            options: ["04", "05", "06", "03"],
+            answer: 1,
+            explanation: "درست جواب: 05۔<br>مسجد حرام، مسجد اقصیٰ، مسجد نبوی، مسجد ضرار، مسجد قباء۔"
+        },
+        {
+            q: "حضورﷺ نے بیت اللہ کی کنجی ہمیشہ کے لیے کسے عطا فرمائی؟",
+            options: ["حضرت بلالؓ", "عثمان بن طلحہ", "حضرت عباسؓ", "حضرت علیؓ"],
+            answer: 1,
+            explanation: "درست جواب: عثمان بن طلحہ۔<br>یہ کنجی قیامت تک ان کے خاندان کے پاس رہے گی۔"
+        },
+        {
+            q: "قرآن پاک کی کس سورت میں بسم اللہ کا دو بار ذکر آیا ہے؟",
+            options: ["سورہ توبہ", "سورہ نمل", "سورہ بقرہ", "سورہ اخلاص"],
+            answer: 1,
+            explanation: "درست جواب: سورہ نمل۔<br>ایک شروع میں اور ایک حضرت سلیمانؑ کے خط میں۔ سورہ توبہ میں بسم اللہ نہیں ہے۔"
+        },
+        {
+            q: "پانچ وقت کی نمازوں میں کتنی رکعتیں ہیں؟",
+            options: ["40", "50", "48", "17"],
+            answer: 2,
+            explanation: "درست جواب: 48۔<br>فجر(4) + ظہر(12) + عصر(8) + مغرب(7) + عشاء(17) = 48۔"
+        },
+        {
+            q: "وضو، غسل اور تیمم کے احکام کس سورہ میں ہے؟",
+            options: ["سورہ المائدہ", "سورہ نساء", "سورہ بقرہ", "سورہ انفال"],
+            answer: 0,
+            explanation: "درست جواب: سورہ المائدہ۔<br>آیت نمبر 6 میں وضو اور طہارت کا مکمل طریقہ بیان ہے۔"
+        },
+        {
+            q: "کونسے صحابی کا نام سورہ احزاب میں آیا ہے؟",
+            options: ["حضرت زیدؓ بن حارثہ", "حضرت ابوبکرؓ", "حضرت عمرؓ", "حضرت عثمانؓ"],
+            answer: 0,
+            explanation: "درست جواب: حضرت زیدؓ۔<br>یہ واحد صحابی ہیں جن کا نام قرآن میں واضح طور پر آیا ہے۔"
+        },
+        {
+            q: "باب القرآن کس سورت کو کہا جاتا ہے؟",
+            options: ["سورہ یاسین", "سورہ فاتحہ", "سورہ رحمٰن", "سورہ بقرہ"],
+            answer: 1,
+            explanation: "درست جواب: سورہ فاتحہ۔<br>اسے ام الکتاب اور قرآن کا دروازہ (باب) بھی کہتے ہیں۔"
+        },
+        {
+            q: "حج میں 'شوط' سے کیا مراد ہے؟",
+            options: ["کعبہ کے گرد ایک چکر", "پورا طواف (7 چکر)", "صفا مروہ کی دوڑ", "قربانی"],
+            answer: 0,
+            explanation: "درست جواب: کعبہ کے گرد ایک چکر۔<br>7 شوط مل کر ایک مکمل 'طواف' بناتے ہیں۔"
+        },
+        {
+            q: "پہلی وحی کہاں نازل ہوئی؟",
+            options: ["غارِ ثور", "غارِ حرا", "کوہِ طور", "بیت المقدس"],
+            answer: 1,
+            explanation: "درست جواب: غارِ حرا۔<br>غارِ ثور میں ہجرت کے دوران قیام کیا تھا۔"
+        },
+        {
+            q: "پانچ نمازیں کب فرض ہوئیں؟",
+            options: ["ہجرتِ مدینہ", "فتح مکہ", "شبِ معراج", "غزوہ بدر"],
+            answer: 2,
+            explanation: "درست جواب: شبِ معراج۔<br>یہ واقعہ 10 نبوی میں پیش آیا، جہاں نماز کا تحفہ ملا۔"
+        },
+        {
+            q: "صحیحین کسے کہتے ہیں؟",
+            options: ["بخاری و مسلم", "بخاری و ترمذی", "مسلم و ابوداؤد", "صحاح ستہ"],
+            answer: 0,
+            explanation: "درست جواب: بخاری و مسلم۔<br>ان دو کتابوں کو اسلام میں قرآن کے بعد سب سے مستند مانا جاتا ہے۔"
+        },
+        {
+            q: "قرآن مجید میں جنت کے فرشتے کا کیا نام ہے؟",
+            options: ["مالک (دوزخ)", "رضوان", "جبرائیل", "میکائیل"],
+            answer: 1,
+            explanation: "درست جواب: رضوان۔<br>مالک جہنم کے داروغہ ہیں، رضوان جنت کے۔"
+        },
+        {
+            q: "قرآن پاک میں کس چیز کو ظلمِ عظیم کہا گیا ہے؟",
+            options: ["جھوٹ", "شرک", "غیبت", "چوری"],
+            answer: 1,
+            explanation: "درست جواب: شرک۔<br>سورہ لقمان میں فرمایا گیا: 'ان الشرک لظلم عظیم'۔"
+        },
+        {
+            q: "قرآن پاک میں کتنے غزوات کا ذکر ہے؟",
+            options: ["12", "27 (کل غزوات)", "10", "5"],
+            answer: 0,
+            explanation: "درست جواب: 12۔<br>کل غزوات کی تعداد 27 ہے، لیکن قرآن میں 12 کا ذکر ہے۔"
+        },
+        {
+            q: "قتلِ عمد سے کیا مراد ہے؟",
+            options: ["غلطی سے قتل", "جان بوجھ کر قتل کرنا", "دفاع میں قتل", "انجان قتل"],
+            answer: 1,
+            explanation: "درست جواب: جان بوجھ کر قتل کرنا۔<br>اس کی سزا قصاص (جان کے بدلے جان) ہے۔"
+        },
+        {
+            q: "حضرت عائشہؓ کی بیان کردہ احادیث کی تعداد کتنی ہے؟",
+            options: ["5374 (ابوہریرہؓ)", "2210", "1540", "1000"],
+            answer: 1,
+            explanation: "درست جواب: 2210۔<br>خواتین میں سب سے زیادہ احادیث حضرت عائشہؓ نے روایت کیں۔"
+        },
+        {
+            q: "حضرت عمرؓ کا قبیلہ کون سا تھا؟",
+            options: ["بنوهشام", "بنو تمیم", "بنو عدی", "بنو امیہ"],
+            answer: 2,
+            explanation: "درست جواب: بنو عدی۔<br>بنو تمیم (حضرت ابوبکرؓ) اور بنو امیہ (حضرت عثمانؓ) کا قبیلہ تھا۔"
+        },
+        {
+            q: "حضرت محمدﷺ کا قبیلہ کون سا تھا؟",
+            options: ["قریش / بنو ہاشم", "بنو ثقیف", "بنو سعد", "بنو خزرج"],
+            answer: 0,
+            explanation: "درست جواب: قریش / بنو ہاشم۔<br>قریش بڑا قبیلہ تھا اور بنو ہاشم اس کی شاخ تھی۔"
+        },
+        {
+            q: "باغِ ارم کے نام سے جنت کس پیغمبر کے دور میں بنوائی گئی؟",
+            options: ["حضرت صالحؑ", "حضرت ہود علیہ السلام", "حضرت موسیٰؑ", "شداد"],
+            answer: 1,
+            explanation: "درست جواب: حضرت ہود علیہ السلام۔<br>یہ بادشاہ شداد نے بنوائی تھی جو قومِ عاد کا بادشاہ تھا۔"
+        },
+        {
+            q: "اونٹنی کا معجزہ کس پیغمبر سے منسوب ہے؟",
+            options: ["حضرت ہودؑ", "حضرت لوطؑ", "حضرت صالح علیہ السلام", "حضرت شعیبؑ"],
+            answer: 2,
+            explanation: "درست جواب: حضرت صالح علیہ السلام۔<br>ان کی قوم (ثمود) نے پہاڑ سے اونٹنی نکلتے دیکھی تھی۔"
+        },
+        {
+            q: "حج کے لغوی معنی کیا ہے؟",
+            options: ["ارادہ کرنا", "سفر کرنا", "زیارت کرنا", "پاک ہونا"],
+            answer: 0,
+            explanation: "درست جواب: ارادہ کرنا (To Intend)۔<br>اصطلاح میں بیت اللہ کی زیارت کا ارادہ حج ہے۔"
+        },
+        {
+            q: "خلفائے راشدین میں سب سے لمبی مدت کس کی ہے؟",
+            options: ["حضرت ابوبکرؓ", "حضرت عمرؓ", "حضرت عثمانؓ", "حضرت علیؓ"],
+            answer: 2,
+            explanation: "درست جواب: حضرت عثمانؓ۔<br>تقریباً 12 سال۔ حضرت ابوبکرؓ کی خلافت سب سے مختصر (2 سال) تھی۔"
+        }
+    ];
+
+    // --- 3. APP LOGIC ---
+    let currentIndex = 0;
+    const card = document.getElementById('card');
+    const qNum = document.getElementById('q-num');
+    const qText = document.getElementById('q-text');
+    const optList = document.getElementById('opt-list');
+    const expBox = document.getElementById('exp-box');
+    const expText = document.getElementById('exp-text');
+    
+    function loadQuestion() {
+        const data = quizData[currentIndex];
+        
+        // Reset UI
+        expBox.style.display = 'none';
+        card.style.animation = 'none';
+        card.offsetHeight; /* trigger reflow */
+        card.style.animation = 'slideIn 0.4s ease';
+
+        // Set Text
+        qNum.innerText = `سوال ${currentIndex + 1} / ${quizData.length}`;
+        qText.innerText = data.q;
+        optList.innerHTML = "";
+
+        // Create Buttons
+        data.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => handleSelect(btn, index, data.answer, data.explanation);
+            optList.appendChild(btn);
+        });
+    }
+
+    function handleSelect(btn, index, correctIndex, explanation) {
+        // Logic: Click to Select / Click again to Deselect
+        
+        // 1. Check if we are deselecting (clicking an already colored button)
+        if (btn.classList.contains('wrong') || btn.classList.contains('correct')) {
+            btn.classList.remove('wrong', 'correct');
+            expBox.style.display = 'none'; // Hide explanation on deselect
+            playSound('click'); // Normal click sound
+            return;
+        }
+
+        // 2. Clear other buttons (Single select mode)
+        const allBtns = document.querySelectorAll('.option-btn');
+        allBtns.forEach(b => b.classList.remove('wrong', 'correct'));
+
+        // 3. Apply Logic
+        if (index === correctIndex) {
+            btn.classList.add('correct');
+            playSound('correct'); // Ding!
+        } else {
+            btn.classList.add('wrong');
+            playSound('wrong'); // Buzz!
+            // Note: We do NOT automatically highlight the green one
+        }
+
+        // 4. Show Explanation
+        expText.innerHTML = explanation;
+        expBox.style.display = 'block';
+    }
+
+    function nextQuestion() {
+        if (currentIndex < quizData.length - 1) {
+            currentIndex++;
+            playSound('click');
+            loadQuestion();
+        } else {
+            alert("ماشاءاللہ! کوئز مکمل ہوگیا۔");
+            currentIndex = 0;
+            loadQuestion();
+        }
+    }
+
+    function prevQuestion() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            playSound('click');
+            loadQuestion();
+        }
+    }
+
+    // Start App
+    loadQuestion();
+
+</script>
+
+
+</body>
+</html>
